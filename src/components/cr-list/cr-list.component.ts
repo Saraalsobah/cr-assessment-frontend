@@ -4,6 +4,7 @@ import { CrApiService } from '../../api/cr-api.service';
 import { SessionService } from '../../session/session.service';
 import { CrStatus, CrSummary } from '../../models/cr.models';
 import { idle, loading, ViewState } from '../../common/view-state';
+import { formatMoney } from '../../common/money.util';
 
 /**
  * Change Request LIST page. Loads the caller's CRs and renders loading / loaded / empty / error
@@ -55,10 +56,15 @@ export class CrListComponent implements OnInit {
 	/** Rows to render, after applying the active status filter. */
 	get visibleRows(): CrSummary[] {
 		const rows = this.state.data ?? [];
-		if (this.statusFilter === 'ALL') {
+		if (this.statusFilter === 'ALL'){
 			return rows;
-		} else {
-			return rows.filter((row) => row.status === this.statusFilter);
 		}
+		
+		return rows.filter((row) => row.status === this.statusFilter);
+	
+	}
+	
+	fmt(amount: number, currency: string): string {
+		return formatMoney(amount, currency);
 	}
 }
