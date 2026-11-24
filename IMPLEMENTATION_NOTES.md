@@ -1,7 +1,6 @@
-# Implementation Notes
+## 0. Orientation
 
-> Fill this in as part of your submission. 1–2 pages, bullet points are fine. Delete these
-> instructions before submitting.
+This is the reviewer UI for Change Requests (CRs): proposed changes to an organisation's purchase agreement that need approval. We have two screens. The list screen loads the current user's CRs (only those in their organisation) and shows a loading, loaded, empty, or error state, with a status filter to narrow the table. The detail screen loads one CR and shows what it changes (a line-item diff with totals and delta), its history, and Approve/Reject actions that are only available when the CR is pending and the user's policies allow it. Each screen keeps its data in a single `ViewState` object (`idle | loading | loaded | empty | error`, plus `data` and `error`) that the template switches on. The detail screen also adds action state (`submitting`, `actionError`, and the reject-reason form control).
 
 ## 1. What I changed
 <!-- Grouped by task: bugs fixed and features implemented (component + template). -->
