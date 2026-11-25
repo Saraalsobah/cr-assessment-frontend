@@ -91,8 +91,26 @@ export class CrDetailComponent implements OnInit {
 	}
 
 	async reject(): Promise<void> {
-		// TODO: require a valid rejectControl, then perform the reject action through the API and
-		//       reflect the outcome in the view.
-		throw new Error('reject() not implemented');
+		if (!this.canReject || this.submitting) return;
+		
+		if (this.rejectControl.invalid) {
+			this.rejectControl.markAsTouched();
+			return;
+		}
+		const reason = this.rejectControl.value.trim();
+
+		this.submitting = true;
+		this.actionError = undefined;
+
+		try {
+			const detail = await this.api.reject(this.session.user, this.id, new Date().toISOString(), reason);
+			this.state = { status: 'loaded', data: detail };
+			this.rejectControl.reset('');
+		} catch (err) {
+			this.actionError = `Couldn't reject this change request: ${(err as Error).message}`;
+		} finally {
+			this.submitting = false;
+		}
+			}
+
 	}
-}
