@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CrApiService } from '../../api/cr-api.service';
@@ -22,6 +22,7 @@ import { canApprovePolicy } from '../../common/permissions';
 })
 export class CrDetailComponent implements OnInit, OnChanges {
 	@Input() id!: string;
+	@Output() changed = new EventEmitter<void>();
 
 	state: ViewState<CrDetail> = idle();
 	submitting = false;
@@ -98,6 +99,7 @@ export class CrDetailComponent implements OnInit, OnChanges {
 		try {
 			const detail = await this.api.approve(this.session.user, this.id, new Date().toISOString());
 			this.state = { status: 'loaded', data: detail };
+			this.changed.emit();
 		} catch (err) {
 			this.actionError = `Couldn't approve this change request: ${(err as Error).message}`;
 		} finally {
@@ -121,6 +123,7 @@ export class CrDetailComponent implements OnInit, OnChanges {
 			const detail = await this.api.reject(this.session.user, this.id, new Date().toISOString(), reason);
 			this.state = { status: 'loaded', data: detail };
 			this.rejectControl.reset('');
+			this.changed.emit();
 		} catch (err) {
 			this.actionError = `Couldn't reject this change request: ${(err as Error).message}`;
 		} finally {
