@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CrApiService } from '../../api/cr-api.service';
@@ -20,18 +20,27 @@ import { canApprovePolicy } from '../../common/permissions';
 	imports: [CommonModule, ReactiveFormsModule],
 	templateUrl: './cr-detail.component.html',
 })
-export class CrDetailComponent implements OnInit {
+export class CrDetailComponent implements OnInit, OnChanges {
 	@Input() id!: string;
 
 	state: ViewState<CrDetail> = idle();
 	submitting = false;
 	actionError?: string;
-	rejectControl = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)]});
+	rejectControl = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] });
 
 	constructor(private readonly api: CrApiService, private readonly session: SessionService) {}
 
 	ngOnInit(): void {
 		void this.load();
+	}
+
+	ngOnChanges(changes: SimpleChanges): void {
+		const idChange = changes['id'];
+		if (idChange && !idChange.firstChange) {
+			this.actionError = undefined;
+			this.rejectControl.reset('');
+			void this.load();
+		}
 	}
 
 	async load(): Promise<void> {
@@ -58,8 +67,7 @@ export class CrDetailComponent implements OnInit {
 		const audit = this.detail?.audit ?? [];
 
 		const copy = [...audit];
-		return copy.sort((a,b)=> Date.parse(a.at)-Date.parse(b.at));
-
+		return copy.sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
 	}
 
 	/** Whether the current user may approve the loaded CR: it must be pending AND the user needs an approve policy. */
@@ -84,15 +92,14 @@ export class CrDetailComponent implements OnInit {
 			this.state = { status: 'loaded', data: detail };
 		} catch (err) {
 			this.actionError = `Couldn't approve this change request: ${(err as Error).message}`;
-		}
-		finally{
+		} finally {
 			this.submitting = false;
 		}
 	}
 
 	async reject(): Promise<void> {
 		if (!this.canReject || this.submitting) return;
-		
+
 		if (this.rejectControl.invalid) {
 			this.rejectControl.markAsTouched();
 			return;
@@ -111,6 +118,5 @@ export class CrDetailComponent implements OnInit {
 		} finally {
 			this.submitting = false;
 		}
-			}
-
 	}
+}
