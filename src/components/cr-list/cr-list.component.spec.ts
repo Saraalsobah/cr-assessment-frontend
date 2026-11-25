@@ -31,19 +31,18 @@ describe('CrListComponent', () => {
 		expect(fixture.nativeElement.querySelector('.cr-list__table')).toBeNull();
 	});
 
-	it('filters the rows by status', async ()=>{
+	it('filters the rows by status', async () => {
 		const fixture = await render(users.approver);
 		fixture.componentInstance.onFilterChange('PENDING_APPROVAL');
 		fixture.detectChanges();
 		expect(fixture.nativeElement.querySelectorAll('.cr-list__row').length).toBe(1);
 	});
 
-	it('shows a no-matches message when no CR has the chosen status', async ()=>{
+	it('shows a no-matches message when no CR has the chosen status', async () => {
 		const fixture = await render(users.approver);
 		fixture.componentInstance.onFilterChange('REJECTED');
 		fixture.detectChanges();
 		expect(fixture.nativeElement.querySelector('.cr-list__no-matches')).not.toBeNull();
 		expect(fixture.nativeElement.querySelector('.cr-list__table')).toBeNull();
-
 	});
 });
