@@ -10,9 +10,9 @@ import { formatMoney } from '../../common/money.util';
 import { canApprovePolicy } from '../../common/permissions';
 
 /**
- * Change Request DETAIL page: loads a CR and renders the diff/preview, the approval timeline, and
- * permission-aware Approve/Reject actions. `load`, the diff binding, and the template skeleton are
- * provided; the timeline ordering, permission gating, actions, and reject validation are yours.
+ * Change Request DETAIL page: loads a CR and renders the diff/preview, the chronological approval
+ * timeline, and permission-aware Approve/Reject actions (with reject-reason validation). Emits
+ * `changed` after a successful action so the parent can refresh the list.
  */
 @Component({
 	selector: 'app-cr-detail',

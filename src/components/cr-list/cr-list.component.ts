@@ -8,8 +8,7 @@ import { formatMoney } from '../../common/money.util';
 
 /**
  * Change Request LIST page. Loads the caller's CRs and renders loading / loaded / empty / error
- * states, plus a status filter. The load + state handling are provided as the pattern; the status
- * filter (`visibleRows`) is yours to complete.
+ * states, plus a status filter (`visibleRows`) with a separate message when no CR matches it.
  */
 @Component({
 	selector: 'app-cr-list',
