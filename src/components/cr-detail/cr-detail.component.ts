@@ -79,6 +79,14 @@ export class CrDetailComponent implements OnInit, OnChanges {
 		return this.canApprove;
 	}
 
+	/** Why no actions are available, or null if the user can act. */
+	get noActionReason(): string | null {
+		if (!this.detail || this.canApprove) return null;
+
+		if (this.detail.status !== 'PENDING_APPROVAL') return `No actions available: this change request is ${this.detail.status}.`;
+		return 'You have read-only access to this change request.';
+	}
+
 	fmt(amount: number): string {
 		return this.detail ? formatMoney(amount, this.detail.currency) : String(amount);
 	}
