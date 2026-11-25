@@ -6,6 +6,7 @@ import { ReqUser } from '../../models/cr.models';
 import { CrApiService } from '../../api/cr-api.service';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 async function render(user: ReqUser, id: string): Promise<ComponentFixture<CrDetailComponent>> {
 	TestBed.configureTestingModule({
@@ -53,8 +54,8 @@ describe('CrDetailComponent', () => {
 		const fixture = await render(users.approver, 'CR-1');
 
 		fixture.nativeElement.querySelector('.cr-actions__approve').click();
-		await flush();              // wait for the fake API
-		fixture.detectChanges();    // re-render with the result
+		await flush(); // wait for the fake API
+		fixture.detectChanges(); // re-render with the result
 
 		expect(fixture.nativeElement.querySelector('.cr-status').textContent.trim()).toBe('APPROVED');
 		expect(fixture.nativeElement.querySelector('.cr-actions__approve').disabled).toBe(true);
@@ -62,7 +63,7 @@ describe('CrDetailComponent', () => {
 
 	it('shows an error and keeps the CR pending when Approve fails', async () => {
 		const fixture = await render(users.approver, 'CR-1');
-		TestBed.inject(CrApiService).failNext = true;   // the next API call will fail
+		TestBed.inject(CrApiService).failNext = true; // the next API call will fail
 
 		fixture.nativeElement.querySelector('.cr-actions__approve').click();
 		await flush();
@@ -77,14 +78,33 @@ describe('CrDetailComponent', () => {
 		const fixture = await render(users.approver, 'CR-1');
 		const rejectBtn = fixture.nativeElement.querySelector('.cr-actions__reject-btn');
 
-		expect(rejectBtn.disabled).toBe(true);                    // empty box
+		expect(rejectBtn.disabled).toBe(true); // empty box
 
-		fixture.componentInstance.rejectControl.setValue('   ');  // only spaces
+		fixture.componentInstance.rejectControl.setValue('   '); // only spaces
 		fixture.detectChanges();
 		expect(rejectBtn.disabled).toBe(true);
 
 		fixture.componentInstance.rejectControl.setValue('Price not agreed');
 		fixture.detectChanges();
 		expect(rejectBtn.disabled).toBe(false);
+	});
+
+	it('disables Approve while a slow request is in flight and sends only one request', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const api = TestBed.inject(CrApiService);
+		api.latencyMs = 50;
+		const spy = jest.spyOn(api, 'approve');
+		const approveBtn = fixture.nativeElement.querySelector('.cr-actions__approve');
+
+		approveBtn.click();
+		fixture.detectChanges();
+		expect(approveBtn.disabled).toBe(true);
+		expect(approveBtn.textContent.trim()).toBe('Approving…');
+
+		void fixture.componentInstance.approve();
+		await wait(60);
+		fixture.detectChanges();
+		expect(spy).toHaveBeenCalledTimes(1);
+		expect(fixture.nativeElement.querySelector('.cr-status').textContent.trim()).toBe('APPROVED');
 	});
 });
