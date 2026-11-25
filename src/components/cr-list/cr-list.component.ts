@@ -56,14 +56,13 @@ export class CrListComponent implements OnInit {
 	/** Rows to render, after applying the active status filter. */
 	get visibleRows(): CrSummary[] {
 		const rows = this.state.data ?? [];
-		if (this.statusFilter === 'ALL'){
+		if (this.statusFilter === 'ALL') {
 			return rows;
 		}
-		
+
 		return rows.filter((row) => row.status === this.statusFilter);
-	
 	}
-	
+
 	fmt(amount: number, currency: string): string {
 		return formatMoney(amount, currency);
 	}
