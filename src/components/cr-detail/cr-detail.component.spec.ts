@@ -31,4 +31,13 @@ describe('CrDetailComponent', () => {
 		const approveBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.cr-actions__approve');
 		expect(approveBtn.disabled).toBe(true);
 	});
+
+	it('shows the timeline oldest-first', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+
+		const elements = fixture.nativeElement.querySelectorAll('.cr-timeline__action');
+		const actions = Array.from(elements).map((el: any) => el.textContent.trim());
+
+		expect(actions).toEqual(['CREATE', 'SUBMIT', 'SEND_FOR_APPROVAL']);
+	});
 });
