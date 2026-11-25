@@ -3,6 +3,7 @@ import { CrDetailComponent } from './cr-detail.component';
 import { SessionService } from '../../session/session.service';
 import { users } from '../../api/fixtures';
 import { ReqUser } from '../../models/cr.models';
+import { CrApiService } from '../../api/cr-api.service';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
@@ -57,5 +58,17 @@ describe('CrDetailComponent', () => {
 
 		expect(fixture.nativeElement.querySelector('.cr-status').textContent.trim()).toBe('APPROVED');
 		expect(fixture.nativeElement.querySelector('.cr-actions__approve').disabled).toBe(true);
+	});
+	it('shows an error and keeps the CR pending when Approve fails', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		TestBed.inject(CrApiService).failNext = true;   // the next API call will fail
+
+		fixture.nativeElement.querySelector('.cr-actions__approve').click();
+		await flush();
+		fixture.detectChanges();
+
+		expect(fixture.nativeElement.querySelector('.cr-actions__error').textContent).toContain("Couldn't approve");
+		expect(fixture.nativeElement.querySelector('.cr-status').textContent.trim()).toBe('PENDING_APPROVAL');
+		expect(fixture.nativeElement.querySelector('.cr-actions__approve').disabled).toBe(false);
 	});
 });
