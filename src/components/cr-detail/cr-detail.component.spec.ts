@@ -40,4 +40,22 @@ describe('CrDetailComponent', () => {
 
 		expect(actions).toEqual(['CREATE', 'SUBMIT', 'SEND_FOR_APPROVAL']);
 	});
+
+	it('shows a read-only message and no reject form to a viewer', async () => {
+		const fixture = await render(users.viewer, 'CR-1');
+
+		expect(fixture.nativeElement.querySelector('.cr-actions__none').textContent).toContain('read-only');
+		expect(fixture.nativeElement.querySelector('.cr-actions__reject')).toBeNull();
+	});
+
+	it('approves a pending CR and shows the new status', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+
+		fixture.nativeElement.querySelector('.cr-actions__approve').click();
+		await flush();              // wait for the fake API
+		fixture.detectChanges();    // re-render with the result
+
+		expect(fixture.nativeElement.querySelector('.cr-status').textContent.trim()).toBe('APPROVED');
+		expect(fixture.nativeElement.querySelector('.cr-actions__approve').disabled).toBe(true);
+	});
 });
