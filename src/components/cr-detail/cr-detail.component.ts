@@ -76,8 +76,18 @@ export class CrDetailComponent implements OnInit {
 	}
 
 	async approve(): Promise<void> {
-		// TODO: perform the approve action through the API and reflect the outcome in the view.
-		throw new Error('approve() not implemented');
+		if (!this.canApprove || this.submitting) return;
+		this.submitting = true;
+		this.actionError = undefined;
+		try {
+			const detail = await this.api.approve(this.session.user, this.id, new Date().toISOString());
+			this.state = { status: 'loaded', data: detail };
+		} catch (err) {
+			this.actionError = `Couldn't approve this change request: ${(err as Error).message}`;
+		}
+		finally{
+			this.submitting = false;
+		}
 	}
 
 	async reject(): Promise<void> {
