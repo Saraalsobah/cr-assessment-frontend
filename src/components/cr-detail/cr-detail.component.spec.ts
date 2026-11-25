@@ -59,6 +59,7 @@ describe('CrDetailComponent', () => {
 		expect(fixture.nativeElement.querySelector('.cr-status').textContent.trim()).toBe('APPROVED');
 		expect(fixture.nativeElement.querySelector('.cr-actions__approve').disabled).toBe(true);
 	});
+
 	it('shows an error and keeps the CR pending when Approve fails', async () => {
 		const fixture = await render(users.approver, 'CR-1');
 		TestBed.inject(CrApiService).failNext = true;   // the next API call will fail
@@ -70,5 +71,20 @@ describe('CrDetailComponent', () => {
 		expect(fixture.nativeElement.querySelector('.cr-actions__error').textContent).toContain("Couldn't approve");
 		expect(fixture.nativeElement.querySelector('.cr-status').textContent.trim()).toBe('PENDING_APPROVAL');
 		expect(fixture.nativeElement.querySelector('.cr-actions__approve').disabled).toBe(false);
+	});
+
+	it('keeps Reject disabled until a real reason is entered', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const rejectBtn = fixture.nativeElement.querySelector('.cr-actions__reject-btn');
+
+		expect(rejectBtn.disabled).toBe(true);                    // empty box
+
+		fixture.componentInstance.rejectControl.setValue('   ');  // only spaces
+		fixture.detectChanges();
+		expect(rejectBtn.disabled).toBe(true);
+
+		fixture.componentInstance.rejectControl.setValue('Price not agreed');
+		fixture.detectChanges();
+		expect(rejectBtn.disabled).toBe(false);
 	});
 });
